@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEON//PY — терминал решений</title>
+<meta name="description" content="Киберпанковский тренажёр Python: 100 авторских задач от простых к сложным, настоящее исполнение кода в браузере.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=JetBrains+Mono:wght@300;400;700&family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=9">
+</head>
+<body>
+
+<div class="fx-noise"></div>
+<div class="fx-scanlines"></div>
+<div class="fx-vignette"></div>
+
+<div class="bg-grid"></div>
+
+<div class="fatal-box" id="fatalBox" hidden></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-glitch" data-text="NEON//PY">NEON//PY</span>
+    <span class="brand-sub">terminal&nbsp;for&nbsp;python&nbsp;minds</span>
+  </div>
+
+  <div class="topbar-stats">
+    <div class="stat">
+      <span class="stat-label">прогресс</span>
+      <span class="stat-value"><b id="statSolved">0</b><i>/100</i></span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">уровень</span>
+      <span class="stat-value"><b id="statLevel">01</b><i> /10</i></span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">серия</span>
+      <span class="stat-value"><b id="statStreak">0</b></span>
+    </div>
+  </div>
+
+  <div class="topbar-actions">
+    <div class="core-status" id="coreStatus" title="Состояние Python-ядра (Pyodide)">
+      <span class="dot"></span><span class="core-text">ядро: инициализация…</span>
+    </div>
+    <button class="user-chip" id="btnUser" title="Профиль и статистика">
+      <span class="user-avatar" id="userAvatar">?</span>
+      <span class="user-nick" id="userNick">GUEST</span>
+    </button>
+    <button class="btn btn-ghost" id="btnReset" title="Сбросить весь прогресс">СБРОС</button>
+  </div>
+
+  <div class="progress-rail"><div class="progress-fill" id="progressFill"></div></div>
+</header>
+
+<main class="layout">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="filter-row">
+        <input type="text" id="taskSearch" class="search" placeholder="поиск по задачам…" autocomplete="off">
+      </div>
+      <div class="filter-chips" id="levelChips">
+        <button class="chip active" data-level="all">ВСЕ</button>
+        <button class="chip" data-level="1">L1</button>
+        <button class="chip" data-level="2">L2</button>
+        <button class="chip" data-level="3">L3</button>
+        <button class="chip" data-level="4">L4</button>
+        <button class="chip" data-level="5">L5</button>
+        <button class="chip" data-level="6">L6</button>
+        <button class="chip" data-level="7">L7</button>
+        <button class="chip" data-level="8">L8</button>
+        <button class="chip" data-level="9">L9</button>
+        <button class="chip" data-level="10">L10</button>
+      </div>
+    </div>
+
+    <nav class="task-list" id="taskList"><!-- generated --></nav>
+
+    <div class="sidebar-foot">
+      <div class="lock-note"><span class="ico">▣</span> Задачи открываются по порядку</div>
+    </div>
+  </aside>
+
+  <!-- ================= WORKSPACE ================= -->
+  <section class="workspace">
+
+    <!-- условие -->
+    <article class="panel panel-task" id="taskPanel">
+      <div class="panel-corner tl"></div><div class="panel-corner tr"></div>
+      <div class="panel-corner bl"></div><div class="panel-corner br"></div>
+
+      <div class="task-meta">
+        <span class="task-index" id="taskIndex">ЗАДАЧА 001</span>
+        <span class="task-level" id="taskLevel">LVL 1</span>
+        <span class="task-tag" id="taskTag">основы</span>
+        <span class="task-source" id="taskSource">bank</span>
+        <span class="task-solved-badge" id="taskSolvedBadge">✓ РЕШЕНО</span>
+      </div>
+
+      <h1 class="task-title" id="taskTitle">Загрузка…</h1>
+      <div class="task-desc" id="taskDesc"></div>
+
+      <div class="task-signature" id="taskSignature" hidden>
+        <span class="sig-label">сигнатура</span>
+        <code id="sigCode"></code>
+      </div>
+
+      <div class="task-actions-row">
+        <button class="btn btn-mini" id="btnHint"><span class="btn-ico">?</span> Подсказка</button>
+        <button class="btn btn-mini" id="btnSolution"><span class="btn-ico">▤</span> Показать решение</button>
+        <span class="spacer"></span>
+        <span class="timer" id="taskTimer">00:00</span>
+      </div>
+      <div class="hint-box" id="hintBox" hidden></div>
+      <div class="solution-box" id="solutionBox" hidden><pre><code id="solutionCode"></code></pre></div>
+
+      <!-- короткая шпаргалка: пока решено мало, объясняем порядок действий -->
+      <div class="first-steps" id="firstSteps">
+        <span class="fs-title">КАК РЕШАТЬ</span>
+        <span class="fs-step"><b>1</b> код ↓</span>
+        <span class="fs-step"><b>2</b> <span class="fs-btn-c">⚡ ПРОВЕРКА</span></span>
+        <span class="fs-step"><b>3</b> <span class="fs-btn-r">▶ ЗАПУСК</span></span>
+      </div>
+    </article>
+
+    <!-- редактор -->
+    <article class="panel panel-editor">
+      <div class="panel-head">
+        <span class="panel-title">// editor.py</span>
+        <span class="panel-head-right">
+          <span class="mono-dim" id="editorStats">0 строк · 0 символов</span>
+          <button class="btn btn-mini" id="btnClear">Очистить</button>
+          <button class="btn btn-mini" id="btnFormat">Авто-отступы</button>
+        </span>
+      </div>
+
+      <div class="editor-wrap">
+        <div class="gutter" id="gutter"></div>
+        <textarea id="editor" class="editor" spellcheck="false" autocomplete="off"
+          autocapitalize="off" autocorrect="off" wrap="off"
+          placeholder="# введите решение здесь&#10;def add(a, b):&#10;    return a + b"></textarea>
+      </div>
+
+      <div class="run-bar">
+        <button class="btn btn-check" id="btnCheck">
+          <span class="btn-ico">⚡</span> ПРОВЕРКА
+          <kbd>Ctrl+↵</kbd>
+        </button>
+        <button class="btn btn-run" id="btnRun">
+          <span class="btn-ico">▶</span> ЗАПУСК
+          <kbd>Ctrl+⇧↵</kbd>
+        </button>
+      </div>
+    </article>
+
+    <!-- консоль -->
+    <article class="panel panel-console">
+      <div class="panel-head">
+        <span class="panel-title">// output.log</span>
+        <span class="panel-head-right">
+          <span class="test-badge" id="testBadge">тесты не запускались</span>
+          <button class="btn btn-mini" id="btnClearLog">Очистить лог</button>
+        </span>
+      </div>
+      <div class="console" id="console"></div>
+    </article>
+  </section>
+
+  <!-- ================= ЖУРНАЛ ОПЕРАТОРА ================= -->
+  <aside class="assistant" id="assistant">
+    <div class="panel-head asst-head">
+      <span class="panel-title">// system-log</span>
+      <span class="asst-state on">ЛОКАЛЬНО</span>
+    </div>
+
+    <div class="asst-log" id="asstLog"></div>
+
+    <div class="asst-quick">
+      <button class="qbtn" data-act="review">разбор</button>
+      <button class="qbtn" data-act="edges">крайние случаи</button>
+      <button class="qbtn" data-act="ref">эталон</button>
+      <button class="qbtn" data-act="stats">статистика</button>
+    </div>
+    <button class="qbtn qbtn-help" id="btnHelp">как решать — инструкция</button>
+  </aside>
+</main>
+
+<!-- ================= PROFILE MODAL ================= -->
+<div class="modal-backdrop" id="profileModal" hidden>
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <span class="panel-title">// идентификатор оператора</span>
+      <button class="btn btn-mini" id="btnCloseProfile">ESC</button>
+    </div>
+    <div class="modal-body">
+      <div class="profile-id">
+        <div class="profile-avatar" id="pAvatar">?</div>
+        <div class="profile-nick-row">
+          <span class="profile-nick" id="pNick">GUEST</span>
+          <span class="profile-rank" id="pRank">НОВИЧОК // RANK 0</span>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-cell"><span class="sc-val" id="pSolved">0</span><span class="sc-lbl">решено</span></div>
+        <div class="stat-cell"><span class="sc-val" id="pAttempts">0</span><span class="sc-lbl">запусков</span></div>
+        <div class="stat-cell"><span class="sc-val" id="pChecks">0</span><span class="sc-lbl">проверок</span></div>
+        <div class="stat-cell"><span class="sc-val" id="pStreak">0</span><span class="sc-lbl">серия</span></div>
+        <div class="stat-cell"><span class="sc-val" id="pLevel">1</span><span class="sc-lbl">уровень</span></div>
+        <div class="stat-cell"><span class="sc-val" id="pTime">0м</span><span class="sc-lbl">в системе</span></div>
+      </div>
+
+      <div class="profile-log">
+        <div><span>профиль создан</span><b id="pCreated">—</b></div>
+        <div><span>последний вход</span><b id="pSeen">—</b></div>
+        <div><span>подсказок использовано</span><b id="pHints">0</b></div>
+        <div><span>эталонов показано</span><b id="pRefs">0</b></div>
+        <div><span>место хранения</span><b>localStorage // это устройство</b></div>
+      </div>
+
+      <p class="modal-note">
+        Вся статистика и код лежат <b>только на этом компьютере</b>, в локальном хранилище браузера.
+        Ни один байт не уходит в интернет: ни позывной, ни статистика, ни твой код.
+      </p>
+      <div class="notice-danger compact">
+        <div class="danger-title"><span class="danger-ico">⚠</span> ОЧИСТКА КЭША = ПОТЕРЯ ПРОГРЕССА</div>
+        <p>Логин и статистика лежат в памяти браузера. Очистка кэша, cookies или «данных сайта»
+           сотрёт <b>прогресс, статистику и весь код безвозвратно</b>. Перед чисткой нажми «ЭКСПОРТ ПРОФИЛЯ».</p>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-mini" id="btnExport">Экспорт профиля .json</button>
+      <button class="btn btn-mini btn-danger" id="btnWipe">Стереть прогресс</button>
+      <span class="spacer"></span>
+      <button class="btn btn-mini" id="btnSwitchUser">Сменить позывной</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ИНСТРУКЦИЯ (первый запуск) ================= -->
+<div class="modal-backdrop" id="introModal" hidden>
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <span class="panel-title">// инструкция оператора</span>
+      <button class="btn btn-mini" id="btnIntroX">ESC</button>
+    </div>
+    <div class="modal-body">
+      <div class="intro-lead">
+        Профиль создан. Дальше — решать задачи. Вот весь порядок действий, он не меняется.
+      </div>
+
+      <ol class="intro-list">
+        <li>
+          <b>Сверху — условие задачи.</b> Под названием есть строка
+          <code>сигнатура</code>: это точное имя функции, которую ждут тесты.
+          Назовёшь функцию иначе — не засчитает, даже если логика верная.
+        </li>
+        <li>
+          <b>Снизу — редактор.</b> Пишешь код там. <code>Tab</code> ставит отступ,
+          <code>Ctrl+↵</code> — проверка, <code>Ctrl+⇧↵</code> — запуск.
+        </li>
+        <li>
+          <b>⚡ ПРОВЕРКА</b> — смотрит код глазами и ничего не выполняет: ищет
+          синтаксические ошибки, отсутствующую функцию, <code>=</code> вместо
+          <code>==</code>, цикл без выхода. Читай лог и исправляй.
+        </li>
+        <li>
+          <b>▶ ЗАПУСК</b> — вот это настоящая проверка: код исполняется в Python 3.12
+          и прогоняется по тестам. Над логом появится строка
+          <code>2/2 тестов пройдено</code>: зелёная — задача решена, красная —
+          ниже написано <code>ожидалось: X | получено: Y</code>.
+        </li>
+        <li>
+          <b>Застрял?</b> Над условием есть «Подсказка» (одна на задачу) и
+          «Показать решение». Эталон не засчитывается — задача закрывается только
+          твоим кодом, прошедшим тесты.
+        </li>
+        <li>
+          <b>Дальше — по порядку.</b> Пока текущая задача не решена, следующие
+          заблокированы: это последовательность сложности. Пройденные можно
+          переоткрывать и переписывать, засчитанное не сгорает.
+        </li>
+      </ol>
+
+      <p class="modal-note">
+        Нужен интернет только при первой загрузке Python-ядра — потом оно живёт
+        в этой вкладке. Код, статистика и позывной никуда не отправляются.
+      </p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-run" id="btnIntroGo">ПОНЯТНО, РЕШАЮ</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ================= AUTH GATE ================= -->
+<div class="auth-screen" id="authScreen" hidden>
+  <div class="auth-scan"></div>
+  <div class="auth-grid"></div>
+
+  <form class="auth-box" id="authForm" autocomplete="off">
+    <div class="auth-rail" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
+    <div class="auth-head">
+      <div class="auth-kicker">вход в сеть // сектор 7.1</div>
+      <h1 class="auth-title" data-text="ИДЕНТИФИКАЦИЯ">ИДЕНТИФИКАЦИЯ</h1>
+      <div class="auth-sub">NEON//PY требует позывной оператора</div>
+    </div>
+
+    <div class="auth-field">
+      <label for="loginInput">ПОЗЫВНОЙ ОПЕРАТОРА <i>*</i></label>
+      <div class="auth-input-wrap">
+        <span class="auth-caret">&gt;</span>
+        <input type="text" id="loginInput" maxlength="24" spellcheck="false"
+               autocomplete="off" placeholder="введи позывной…" aria-describedby="authNotice">
+        <button type="button" class="auth-dice" id="btnRandNick" title="Сгенерировать позывной">⚄</button>
+      </div>
+      <div class="auth-last" id="authLast" hidden>
+        <span>последний ввод:</span>
+        <button type="button" class="auth-last-btn" id="btnUseLast">—</button>
+        <span class="auth-hint-sm">↑ подставить</span>
+      </div>
+      <div class="auth-error" id="authError" hidden>// ОШИБКА: ПОЗЫВНОЙ ОБЯЗАТЕЛЕН</div>
+    </div>
+
+    <div class="notice-run">
+      <div class="danger-title"><span class="danger-ico">▣</span> КАК ЭТО РАБОТАЕТ</div>
+      <p>
+        Страница запускается простым двойным щелчком по файлу — <b>ничего больше
+        не нужно</b>: ни установки, ни команд, ни настроек. Настоящий интерпретатор
+        Python 3.12 загружается прямо в браузер и исполняет твой код на этой странице.
+      </p>
+      <p class="danger-hint">
+        Единственный нюанс: код исполняется на самой странице, поэтому цикл без выхода
+        (<code>while True:</code> без <code>break</code>) <b>заморозит вкладку</b>.
+        Нажми сначала <b>ПРОВЕРКА</b> — она находит такой цикл по тексту кода, ничего
+        не выполняя, и <b>ЗАПУСК</b> такой код просто не выполнит.
+      </p>
+    </div>
+
+    <div class="auth-notice" id="authNotice">
+      <div class="notice-title"><span class="notice-ico">▣</span> ЛОКАЛЬНЫЙ РЕЖИМ ХРАНЕНИЯ</div>
+      <p>
+        Логин нужен <b>только чтобы вести и сохранять твою статистику</b> — она пишется
+        <b>прямо на этом устройстве</b>, в его локальном хранилище.
+      </p>
+      <p class="notice-strike">
+        В сеть не уходит <b>ничего</b>: ни позывной, ни статистика, ни твой код.
+        Серверов у нас нет. Канал в интернет закрыт, телеметрия отключена.
+      </p>
+      <div class="notice-grid">
+        <span>СЕТЬ</span><b class="off">ЗАБЛОКИРОВАНА</b>
+        <span>ХРАНИЛИЩЕ</span><b>ЛОКАЛЬНОЕ</b>
+        <span>СЕРВЕР</span><b class="off">ОТСУТСТВУЕТ</b>
+        <span>БАНК ЗАДАЧ</span><b>100 // В КОДЕ СТРАНИЦЫ</b>
+      </div>
+    </div>
+
+    <div class="notice-danger" id="lsNotice" hidden>
+      <div class="danger-title"><span class="danger-ico">⚠</span> ПРОГРЕСС НЕ СОХРАНЯЕТСЯ</div>
+      <p>
+        Браузер запретил сайту хранить данные на этом устройстве. Решать задачи
+        можно, но <b>после закрытия вкладки прогресс и весь код пропадут</b>.
+      </p>
+      <p class="danger-hint">
+        Обычно это режим инкогнито или запрет «данных сайта». Выйди из приватного
+        режима — и сохранение заработает.
+      </p>
+    </div>
+
+    <div class="notice-danger" id="authDanger">
+      <div class="danger-title"><span class="danger-ico">⚠</span> ПРЕДУПРЕЖДЕНИЕ // ОЧИСТКА КЭША УНИЧТОЖАЕТ ДАННЫЕ</div>
+      <p>
+        Всё, что ты накопил, живёт <b>в памяти браузера на этом устройстве</b>. Стоит очистить
+        кэш, cookies или «данные сайта» — и <b>статистика, прогресс и весь написанный код
+        будут стёрты безвозвратно</b>, восстановить их будет неоткуда.
+      </p>
+      <p class="danger-hint">
+        Страховка: <b>чисти кэш → сначала жми «ЭКСПОРТ ПРОФИЛЯ .JSON»</b>
+        в меню «ИДЕНТИФИКАТОР ОПЕРАТОРА» (клик по позывному в шапке).
+      </p>
+    </div>
+
+    <div class="auth-profiles" id="authProfiles" hidden>
+      <div class="ap-title">// ПРОФИЛИ НА ЭТОМ УСТРОЙСТВЕ</div>
+      <div class="ap-list" id="apList"></div>
+    </div>
+
+    <button type="submit" class="auth-enter">
+      <span>ВОЙТИ В СЕТЬ</span>
+      <span class="auth-enter-ico">▶</span>
+    </button>
+
+    <div class="auth-foot">
+      <span>ESC-терминал // сборка 2077.10</span>
+      <span class="auth-foot-r">данные не покидают устройство</span>
+    </div>
+  </form>
+</div>
+
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-inner">
+    <div class="boot-logo">NEON<span>//</span>PY</div>
+    <div class="boot-lines" id="bootLines"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
+<script src="script.js?v=5"></script>
+</body>
+</html>
